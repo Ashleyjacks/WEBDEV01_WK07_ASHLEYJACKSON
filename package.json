@@ -1,0 +1,20 @@
+{
+  "name": "wk07",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "dependencies": {
+    "cli-table3": "^0.6.2",
+    "colors": "^1.4.0",
+    "inquirer": "^8.2.2",
+    "lodash": "^4.17.21",
+    "uuid": "^8.3.2"
+  },
+  "type": "commonjs"
+}
