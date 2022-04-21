@@ -1,7 +1,7 @@
 const fs = require('fs')
 const uuidv4 = require('uuid').v4
 const { db, getTodoList } = require('./utility')
-const { promptInput } = require('./prompts')
+const { promptInput, promptList } = require('./prompts')
 
 const dbPath = './database/db.json'
 
@@ -9,7 +9,11 @@ const lookupTable = async (answer, id) => {
     return await {
         new: addNewEntry,
         exit: exitApp,
-        add: addItemToList
+        add: addItemToList,
+        remove: removeItemsFromList,
+        update: updateListStatus,
+        view: viewList,
+        back: goBackOneLevel
     }[answer](id)
 }
 
@@ -55,7 +59,25 @@ const addItemToList = async (id) => {
     const modifiedDB = [...db().filter(list => list.id != id), modifiedTodoList]
     fs.writeFileSync(dbPath, JSON.stringify(modifiedDB), { encoding: 'utf-8' })
     return id
-
 }
+
+const removeItemsFromList = async (id) => {
+    const todoList = getTodoList(id)
+    const items = todoList.items.map(item => {
+        return { name: item.text, value: item.id }
+    })
+    const result = await promptList('Select the item to delete.', items)
+
+    const modifiedTodoList = { ...todoList, items: todoList.items.filter(item => item.id != result.answer) }
+    const modifiedDB = [...db().filter(list => list.id != id), modifiedTodoList]
+    fs.writeFileSync(dbPath, JSON.stringify(modifiedDB), { encoding: 'utf-8' })
+    return id
+}
+
+const updateListStatus = async (id) => { }
+
+const viewList = async (id) => { }
+
+const goBackOneLevel = async (id) => { }
 
 exports.lookupTable = lookupTable;
