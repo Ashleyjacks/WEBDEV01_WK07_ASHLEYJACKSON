@@ -9,6 +9,7 @@ const dbPath = './database/db.json'
 const lookupTable = async (answer, id) => {
     return await {
         new: addNewEntry,
+        select: selectList,
         exit: exitApp,
         add: addItemToList,
         remove: removeItemsFromList,
@@ -36,11 +37,22 @@ const addNewEntry = async () => {
     return entry.id
 }
 
+const selectList = async () => {
+    const choices = db().map(list => {
+        const { name, id } = list
+        return { name: list.name, value: id }
+    })
+
+    const result = await promptList('Select Todo-list:', choices)
+    const activeList = getTodoList(result.answer)
+    return activeList.id
+}
+
 const exitApp = () => {
     console.clear()
     console.log('Thank you. See you again')
     console.log(' ')
-    return null;
+    return 'exit';
 }
 
 // submenu
@@ -59,11 +71,15 @@ const addItemToList = async (id) => {
     const modifiedTodoList = { ...todoList, items: [...todoList.items, entry] }
     const modifiedDB = [...db().filter(list => list.id != id), modifiedTodoList]
     fs.writeFileSync(dbPath, JSON.stringify(modifiedDB), { encoding: 'utf-8' })
-    return id
+    return await viewList(id)
 }
 
 const removeItemsFromList = async (id) => {
     const todoList = getTodoList(id)
+    if (todoList.items.length == 0) {
+        await confirmRecursively('Can not remove from empty list. Try again')
+        return id;
+    }
     const items = todoList.items.map(item => {
         return { name: item.text, value: item.id }
     })
@@ -72,11 +88,16 @@ const removeItemsFromList = async (id) => {
     const modifiedTodoList = { ...todoList, items: todoList.items.filter(item => item.id != result.answer) }
     const modifiedDB = [...db().filter(list => list.id != id), modifiedTodoList]
     fs.writeFileSync(dbPath, JSON.stringify(modifiedDB), { encoding: 'utf-8' })
-    return id
+    return await viewList(id)
 }
 
 const updateListStatus = async (id) => {
     const todoList = getTodoList(id)
+    if (todoList.items.length == 0) {
+        await confirmRecursively('Can not update empty list. Try again')
+        return id;
+    }
+
     const items = todoList.items.map(item => {
         return { name: item.text, value: item.id, checked: item.complete }
     })
@@ -92,7 +113,7 @@ const updateListStatus = async (id) => {
     const modifiedTodoList = { ...todoList, items: modifiedItems }
     const modifiedDB = [...db().filter(list => list.id != id), modifiedTodoList]
     fs.writeFileSync(dbPath, JSON.stringify(modifiedDB), { encoding: 'utf-8' })
-    return id
+    return await viewList(id)
 }
 
 const viewList = async (id) => {
@@ -114,7 +135,7 @@ const viewList = async (id) => {
 }
 
 const goBackOneLevel = async (id) => {
-    // const todoList = getTodoList(id)
+    return 'back'
 }
 
 exports.lookupTable = lookupTable;

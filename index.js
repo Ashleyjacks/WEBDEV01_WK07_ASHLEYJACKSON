@@ -1,14 +1,9 @@
-// const fs = require('fs')
 const inq = require('inquirer')
-// const uuidv4 = require('uuid').v4
 const colors = require('colors')
-const Table = require('cli-table3')
 const _ = require('lodash')
 
 const { messageTitle } = require('./support/messages')
 const { lookupTable } = require('./support/menu')
-// const { db } = require('./support/utility')
-
 
 const run = async (id = null) => {
     messageTitle(id)
@@ -43,7 +38,10 @@ const run = async (id = null) => {
     ])
 
     const returnedId = await lookupTable(result.answer, id)
-    returnedId ? run(returnedId) : null
+
+    if (returnedId == 'back') { return run() }
+    if (returnedId == 'exit') { return null }
+    return run(returnedId)
 }
 
 run()
