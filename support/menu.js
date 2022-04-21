@@ -1,7 +1,7 @@
 const fs = require('fs')
 const uuidv4 = require('uuid').v4
 const { db, getTodoList } = require('./utility')
-const { promptInput, promptList } = require('./prompts')
+const { promptInput, promptList, promtCheckbox } = require('./prompts')
 
 const dbPath = './database/db.json'
 
@@ -74,7 +74,25 @@ const removeItemsFromList = async (id) => {
     return id
 }
 
-const updateListStatus = async (id) => { }
+const updateListStatus = async (id) => {
+    const todoList = getTodoList(id)
+    const items = todoList.items.map(item => {
+        return { name: item.text, value: item.id, checked: item.complete }
+    })
+    const result = await promtCheckbox('Select completed items.', items)
+    const modifiedItems = todoList.items.map(item => {
+        if (result.answer.includes(item.id)) {
+            return { ...item, complete: true }
+        }
+
+        return { ...item, complete: false }
+    })
+
+    const modifiedTodoList = { ...todoList, items: modifiedItems }
+    const modifiedDB = [...db().filter(list => list.id != id), modifiedTodoList]
+    fs.writeFileSync(dbPath, JSON.stringify(modifiedDB), { encoding: 'utf-8' })
+    return id
+}
 
 const viewList = async (id) => { }
 
